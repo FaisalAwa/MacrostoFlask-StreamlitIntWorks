@@ -1,0 +1,1042 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Macro Operations 🐍</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .upload-section {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .upload-section:hover {
+            border-color: #764ba2;
+            background: #f8f9ff;
+        }
+
+        .upload-section.dragover {
+            border-color: #764ba2;
+            background: #f0f2ff;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .file-label {
+            cursor: pointer;
+            color: #667eea;
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+
+        .file-name {
+            margin-top: 15px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1em;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            font-weight: 600;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .processing-info {
+            margin: 30px 0;
+            padding: 20px;
+            background: #f8f9ff;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .processing-info.show {
+            display: block;
+        }
+
+        .timer {
+            font-size: 1.2em;
+            color: #667eea;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .status-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .status-table th {
+            background: #667eea;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .status-table td {
+            padding: 12px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .status-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .status-completed {
+            color: #22c55e;
+            font-weight: 600;
+        }
+
+        .status-progress {
+            color: #f59e0b;
+            font-weight: 600;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .alert.show {
+            display: block;
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border-left: 4px solid #22c55e;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border-left: 4px solid #ef4444;
+        }
+
+        .download-btn {
+            background: #22c55e;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .download-btn.show {
+            display: inline-block;
+        }
+
+        .download-btn:hover {
+            box-shadow: 0 10px 20px rgba(34, 197, 94, 0.4);
+        }
+
+        .steps-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9ff;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .steps-section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .steps-section ul {
+            padding-left: 20px;
+        }
+
+        .steps-section li {
+            margin: 8px 0;
+            color: #555;
+        }
+
+        .steps-toggle {
+            background: none;
+            border: none;
+            color: #667eea;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            text-decoration: underline;
+        }
+
+        .steps-content {
+            display: none;
+        }
+
+        .steps-content.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Document Macro Operations 🐍</h1>
+        <p class="subtitle">Support for both DOCX and ODT files</p>
+
+        <div class="upload-section" id="uploadSection">
+            <label for="fileInput" class="file-label">
+                📄 Click to upload or drag and drop<br>
+                <small style="color: #999;">(DOCX or ODT files only)</small>
+            </label>
+            <input type="file" id="fileInput" accept=".docx,.odt">
+            <div class="file-name" id="fileName"></div>
+        </div>
+
+        <button class="btn" id="processBtn" disabled>Apply Macros</button>
+
+        <div class="alert alert-success" id="successAlert"></div>
+        <div class="alert alert-error" id="errorAlert"></div>
+
+        <div class="processing-info" id="processingInfo">
+            <div class="timer" id="timer">Processing... Time elapsed: 0.00 seconds</div>
+            
+            <table class="status-table">
+                <thead>
+                    <tr>
+                        <th>Macro Name</th>
+                        <th>Status</th>
+                        <th>Time</th>
+                    </tr>
+                </thead>
+                <tbody id="statusTableBody">
+                </tbody>
+            </table>
+        </div>
+
+        <a class="btn download-btn" id="downloadBtn" download>📥 Download Processed File</a>
+
+        <div class="steps-section">
+            <button class="steps-toggle" onclick="toggleSteps()">📘 View Document Processing Steps</button>
+            <div class="steps-content" id="stepsContent">
+                <h3>For ODT Files:</h3>
+                <ul>
+                    <li>Fix question numbering in ascending order (1, 2, 3... not 01, 02, 03)</li>
+                    <li>Convert "Question No:" to "Question:" format</li>
+                    <li>Remove bracket text like [People], [Process] etc.</li>
+                    <li>Preserve valid question types (HOTSPOT, SIMULATION, DRAG DROP, etc.)</li>
+                </ul>
+
+                <h3 style="margin-top: 20px;">For DOCX Files:</h3>
+                <ul>
+                    <li><strong>Fix question numbering and remove brackets</strong>
+                        <ul>
+                            <li>Convert "Question No:" to "Question:" format</li>
+                            <li>Sequential numbering (1, 2, 3... not 01, 02, 03)</li>
+                            <li>Remove bracket text like [People], [Process]</li>
+                            <li>Preserve valid question types</li>
+                        </ul>
+                    </li>
+                    <li>Ensure proper spacing before 'QUESTION NO:' tags</li>
+                    <li>Combined text operations (optimized):
+                        <ul>
+                            <li>Replace 'QUESTION NO:' with 'Question:'</li>
+                            <li>Remove all existing 'Explanation:' tags</li>
+                            <li>Replace 'References' with 'Reference'</li>
+                            <li>Remove all &lt;map&gt;...&lt;/map&gt; XML tags</li>
+                        </ul>
+                    </li>
+                    <li>Move question types to next line</li>
+                    <li>Normalize option spacing (A. text, B. text)</li>
+                    <li>Insert 'Explanation:' tag where needed</li>
+                    <li>Add line spacing after 'Question:' and 'Answer:' tags</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedFile = null;
+        let timerInterval = null;
+        let startTime = null;
+
+        const fileInput = document.getElementById('fileInput');
+        const fileName = document.getElementById('fileName');
+        const processBtn = document.getElementById('processBtn');
+        const uploadSection = document.getElementById('uploadSection');
+        const processingInfo = document.getElementById('processingInfo');
+        const timer = document.getElementById('timer');
+        const statusTableBody = document.getElementById('statusTableBody');
+        const successAlert = document.getElementById('successAlert');
+        const errorAlert = document.getElementById('errorAlert');
+        const downloadBtn = document.getElementById('downloadBtn');
+
+        // File input change handler
+        fileInput.addEventListener('change', (e) => {
+            handleFileSelect(e.target.files[0]);
+        });
+
+        // Drag and drop handlers
+        uploadSection.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadSection.classList.add('dragover');
+        });
+
+        uploadSection.addEventListener('dragleave', () => {
+            uploadSection.classList.remove('dragover');
+        });
+
+        uploadSection.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadSection.classList.remove('dragover');
+            handleFileSelect(e.dataTransfer.files[0]);
+        });
+
+        function handleFileSelect(file) {
+            if (!file) return;
+
+            const ext = file.name.split('.').pop().toLowerCase();
+            if (ext !== 'docx' && ext !== 'odt') {
+                showError('Please upload a DOCX or ODT file only');
+                return;
+            }
+
+            selectedFile = file;
+            fileName.textContent = `Selected: ${file.name}`;
+            processBtn.disabled = false;
+            hideAlerts();
+        }
+
+        // Process button click handler
+        processBtn.addEventListener('click', async () => {
+            if (!selectedFile) return;
+
+            hideAlerts();
+            processBtn.disabled = true;
+            downloadBtn.classList.remove('show');
+            
+            // Show processing info
+            processingInfo.classList.add('show');
+            statusTableBody.innerHTML = '';
+            
+            // Start timer
+            startTime = Date.now();
+            timerInterval = setInterval(updateTimer, 50);
+
+            // Create form data
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+
+            try {
+                const response = await fetch('/process', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                // Stop timer
+                clearInterval(timerInterval);
+
+                if (data.success) {
+                    // Update status table with final results
+                    updateStatusTable(data.status_updates);
+                    
+                    // Show success message
+                    let message = `✅ File processed successfully in ${data.total_time} seconds!`;
+                    if (data.questions_fixed) {
+                        message += `\n📊 Fixed ${data.questions_fixed} questions`;
+                    }
+                    showSuccess(message);
+
+                    // Setup download button
+                    downloadBtn.href = `/download/${data.filename}`;
+                    downloadBtn.classList.add('show');
+                } else {
+                    showError(data.error || 'Processing failed');
+                }
+            } catch (error) {
+                clearInterval(timerInterval);
+                showError('Network error: ' + error.message);
+            } finally {
+                processBtn.disabled = false;
+            }
+        });
+
+        function updateTimer() {
+            const elapsed = (Date.now() - startTime) / 1000;
+            timer.textContent = `Processing... Time elapsed: ${elapsed.toFixed(2)} seconds`;
+        }
+
+        function updateStatusTable(updates) {
+            statusTableBody.innerHTML = '';
+            updates.forEach(update => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${update.name}</td>
+                    <td class="${update.status === 'completed' ? 'status-completed' : 'status-progress'}">
+                        ${update.status === 'completed' ? '✅ Applied' : '⏳ In Progress'}
+                    </td>
+                    <td>${update.time}</td>
+                `;
+                statusTableBody.appendChild(row);
+            });
+        }
+
+        function showSuccess(message) {
+            successAlert.textContent = message;
+            successAlert.classList.add('show');
+            errorAlert.classList.remove('show');
+        }
+
+        function showError(message) {
+            errorAlert.textContent = '❌ ' + message;
+            errorAlert.classList.add('show');
+            successAlert.classList.remove('show');
+        }
+
+        function hideAlerts() {
+            successAlert.classList.remove('show');
+            errorAlert.classList.remove('show');
+        }
+
+        function toggleSteps() {
+            const content = document.getElementById('stepsContent');
+            content.classList.toggle('show');
+        }
+    </script>
+</body>
+</html> -->
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Macro Operations 🐍</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .upload-section {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .upload-section:hover {
+            border-color: #764ba2;
+            background: #f8f9ff;
+        }
+
+        .upload-section.dragover {
+            border-color: #764ba2;
+            background: #f0f2ff;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .file-label {
+            cursor: pointer;
+            color: #667eea;
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+
+        .file-name {
+            margin-top: 15px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1em;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            font-weight: 600;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .processing-info {
+            margin: 30px 0;
+            padding: 20px;
+            background: #f8f9ff;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .processing-info.show {
+            display: block;
+        }
+
+        .timer {
+            font-size: 1.2em;
+            color: #667eea;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .status-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .status-table th {
+            background: #667eea;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .status-table td {
+            padding: 12px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .status-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .status-table tr {
+            transition: background-color 0.3s ease;
+        }
+
+        .status-table tr.updating {
+            animation: pulse 0.5s ease-in-out;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                background-color: transparent;
+            }
+            50% {
+                background-color: #fff3cd;
+            }
+        }
+
+        .status-completed {
+            color: #22c55e;
+            font-weight: 600;
+        }
+
+        .status-progress {
+            color: #f59e0b;
+            font-weight: 600;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .alert.show {
+            display: block;
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border-left: 4px solid #22c55e;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border-left: 4px solid #ef4444;
+        }
+
+        .download-btn {
+            background: #22c55e;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .download-btn.show {
+            display: inline-block;
+        }
+
+        .download-btn:hover {
+            box-shadow: 0 10px 20px rgba(34, 197, 94, 0.4);
+        }
+
+        .steps-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9ff;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .steps-section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .steps-section ul {
+            padding-left: 20px;
+        }
+
+        .steps-section li {
+            margin: 8px 0;
+            color: #555;
+        }
+
+        .steps-toggle {
+            background: none;
+            border: none;
+            color: #667eea;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            text-decoration: underline;
+        }
+
+        .steps-content {
+            display: none;
+        }
+
+        .steps-content.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Document Macro Operations 🐍</h1>
+        <p class="subtitle">Support for  DOCX files</p>
+
+        <div class="upload-section" id="uploadSection">
+            <label for="fileInput" class="file-label">
+                📄 Click to upload or drag and drop<br>
+                <small style="color: #999;">(DOCX )</small>
+            </label>
+            <input type="file" id="fileInput" accept=".docx,.odt">
+            <div class="file-name" id="fileName"></div>
+        </div>
+
+        <button class="btn" id="processBtn" disabled>Apply Macros</button>
+
+        <div class="alert alert-success" id="successAlert"></div>
+        <div class="alert alert-error" id="errorAlert"></div>
+
+        <div class="processing-info" id="processingInfo">
+            <div class="timer" id="timer">Processing... Time elapsed: 0.00 seconds</div>
+            
+            <table class="status-table">
+                <thead>
+                    <tr>
+                        <th>Macro Name</th>
+                        <th>Status</th>
+                        <th>Time</th>
+                    </tr>
+                </thead>
+                <tbody id="statusTableBody">
+                </tbody>
+            </table>
+        </div>
+
+        <a class="btn download-btn" id="downloadBtn" download>📥 Download Processed File</a>
+
+        <div class="steps-section">
+            <button class="steps-toggle" onclick="toggleSteps()">📘 View Document Processing Steps</button>
+            <div class="steps-content" id="stepsContent">
+                <h3>For ODT Files:</h3>
+                <ul>
+                    <li>Fix question numbering in ascending order (1, 2, 3... not 01, 02, 03)</li>
+                    <li>Convert "Question No:" to "Question:" format</li>
+                    <li>Remove bracket text like [People], [Process] etc.</li>
+                    <li>Preserve valid question types (HOTSPOT, SIMULATION, DRAG DROP, etc.)</li>
+                </ul>
+
+                <h3 style="margin-top: 20px;">For DOCX Files:</h3>
+                <ul>
+                    <li><strong>Fix question numbering and remove brackets</strong>
+                        <ul>
+                            <li>Convert "Question No:" to "Question:" format</li>
+                            <li>Sequential numbering (1, 2, 3... not 01, 02, 03)</li>
+                            <li>Remove bracket text like [People], [Process]</li>
+                            <li>Preserve valid question types</li>
+                        </ul>
+                    </li>
+                    <li>Ensure proper spacing before 'QUESTION NO:' tags</li>
+                    <li>Combined text operations (optimized):
+                        <ul>
+                            <li>Replace 'QUESTION NO:' with 'Question:'</li>
+                            <li>Remove all existing 'Explanation:' tags</li>
+                            <li>Replace 'References' with 'Reference'</li>
+                            <li>Remove all &lt;map&gt;...&lt;/map&gt; XML tags</li>
+                        </ul>
+                    </li>
+                    <li>Move question types to next line</li>
+                    <li>Normalize option spacing (A. text, B. text)</li>
+                    <li>Insert 'Explanation:' tag where needed</li>
+                    <li>Add line spacing after 'Question:' and 'Answer:' tags</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedFile = null;
+        let timerInterval = null;
+        let startTime = null;
+        let eventSource = null;
+
+        const fileInput = document.getElementById('fileInput');
+        const fileName = document.getElementById('fileName');
+        const processBtn = document.getElementById('processBtn');
+        const uploadSection = document.getElementById('uploadSection');
+        const processingInfo = document.getElementById('processingInfo');
+        const timer = document.getElementById('timer');
+        const statusTableBody = document.getElementById('statusTableBody');
+        const successAlert = document.getElementById('successAlert');
+        const errorAlert = document.getElementById('errorAlert');
+        const downloadBtn = document.getElementById('downloadBtn');
+
+        // Store all status updates
+        let statusUpdates = [];
+
+        // File input change handler
+        fileInput.addEventListener('change', (e) => {
+            handleFileSelect(e.target.files[0]);
+        });
+
+        // Drag and drop handlers
+        uploadSection.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadSection.classList.add('dragover');
+        });
+
+        uploadSection.addEventListener('dragleave', () => {
+            uploadSection.classList.remove('dragover');
+        });
+
+        uploadSection.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadSection.classList.remove('dragover');
+            handleFileSelect(e.dataTransfer.files[0]);
+        });
+
+        function handleFileSelect(file) {
+            if (!file) return;
+
+            const ext = file.name.split('.').pop().toLowerCase();
+            if (ext !== 'docx' && ext !== 'odt') {
+                showError('Please upload a DOCX or ODT file only');
+                return;
+            }
+
+            selectedFile = file;
+            fileName.textContent = `Selected: ${file.name}`;
+            processBtn.disabled = false;
+            hideAlerts();
+        }
+
+        // Process button click handler
+        processBtn.addEventListener('click', async () => {
+            if (!selectedFile) return;
+
+            hideAlerts();
+            processBtn.disabled = true;
+            downloadBtn.classList.remove('show');
+            
+            // Show processing info
+            processingInfo.classList.add('show');
+            statusTableBody.innerHTML = '';
+            statusUpdates = [];
+            
+            // Start timer
+            startTime = Date.now();
+            timerInterval = setInterval(updateTimer, 50);
+
+            // Setup Server-Sent Events connection
+            setupSSEConnection();
+
+            // Create form data
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+
+            try {
+                const response = await fetch('/process', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (!data.success) {
+                    throw new Error(data.error || 'Processing failed');
+                }
+            } catch (error) {
+                clearInterval(timerInterval);
+                closeSSEConnection();
+                showError('Network error: ' + error.message);
+                processBtn.disabled = false;
+            }
+        });
+
+        function setupSSEConnection() {
+            // Close existing connection if any
+            closeSSEConnection();
+
+            // Create new EventSource connection
+            eventSource = new EventSource('/status-stream');
+
+            eventSource.onmessage = function(event) {
+                try {
+                    const data = JSON.parse(event.data);
+                    
+                    if (data.type === 'heartbeat') {
+                        return; // Ignore heartbeat messages
+                    }
+                    
+                    if (data.type === 'start') {
+                        console.log('Processing started');
+                        return;
+                    }
+                    
+                    if (data.type === 'status') {
+                        handleStatusUpdate(data);
+                    }
+                    
+                    if (data.type === 'complete') {
+                        handleProcessingComplete(data);
+                    }
+                    
+                    if (data.type === 'error') {
+                        handleProcessingError(data);
+                    }
+                } catch (e) {
+                    console.error('Error parsing SSE data:', e);
+                }
+            };
+
+            eventSource.onerror = function(error) {
+                console.error('SSE Error:', error);
+                closeSSEConnection();
+            };
+        }
+
+        function closeSSEConnection() {
+            if (eventSource) {
+                eventSource.close();
+                eventSource = null;
+            }
+        }
+
+        function handleStatusUpdate(data) {
+            // Find if this status already exists
+            const existingIndex = statusUpdates.findIndex(s => s.name === data.name);
+            
+            if (existingIndex >= 0) {
+                // Update existing status
+                statusUpdates[existingIndex] = data;
+            } else {
+                // Add new status
+                statusUpdates.push(data);
+            }
+            
+            // Update the table
+            updateStatusTable(statusUpdates);
+        }
+
+        function handleProcessingComplete(data) {
+            // Stop timer
+            clearInterval(timerInterval);
+            closeSSEConnection();
+            
+            // Show success message
+            let message = `✅ File processed successfully in ${data.total_time} seconds!`;
+            if (data.questions_fixed) {
+                message += `\n📊 Fixed ${data.questions_fixed} questions`;
+            }
+            showSuccess(message);
+
+            // Setup download button
+            downloadBtn.href = `/download/${data.filename}`;
+            downloadBtn.classList.add('show');
+            
+            processBtn.disabled = false;
+        }
+
+        function handleProcessingError(data) {
+            clearInterval(timerInterval);
+            closeSSEConnection();
+            showError(data.message);
+            processBtn.disabled = false;
+        }
+
+        function updateTimer() {
+            const elapsed = (Date.now() - startTime) / 1000;
+            timer.textContent = `Processing... Time elapsed: ${elapsed.toFixed(2)} seconds`;
+        }
+
+        function updateStatusTable(updates) {
+            statusTableBody.innerHTML = '';
+            updates.forEach(update => {
+                const row = document.createElement('tr');
+                
+                // Add animation class if in progress
+                if (update.status === 'in_progress') {
+                    row.classList.add('updating');
+                }
+                
+                let statusHtml = '';
+                let statusClass = '';
+                
+                if (update.status === 'completed') {
+                    statusHtml = '✅ Applied';
+                    statusClass = 'status-completed';
+                } else if (update.status === 'in_progress') {
+                    statusHtml = '⏳ In Progress';
+                    statusClass = 'status-progress';
+                }
+                
+                row.innerHTML = `
+                    <td>${update.name}</td>
+                    <td class="${statusClass}">${statusHtml}</td>
+                    <td>${update.time}</td>
+                `;
+                statusTableBody.appendChild(row);
+            });
+        }
+
+        function showSuccess(message) {
+            successAlert.textContent = message;
+            successAlert.classList.add('show');
+            errorAlert.classList.remove('show');
+        }
+
+        function showError(message) {
+            errorAlert.textContent = '❌ ' + message;
+            errorAlert.classList.add('show');
+            successAlert.classList.remove('show');
+        }
+
+        function hideAlerts() {
+            successAlert.classList.remove('show');
+            errorAlert.classList.remove('show');
+        }
+
+        function toggleSteps() {
+            const content = document.getElementById('stepsContent');
+            content.classList.toggle('show');
+        }
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            closeSSEConnection();
+        });
+    </script>
+</body>
+</html>

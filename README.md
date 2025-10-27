@@ -1,130 +1,282 @@
-# Document Macro Operations - Flask Application
+# ODT Question Processor - Complete Documentation
 
-Ye application DOCX aur ODT files ko process karti hai aur multiple document macros apply karti hai.
+## 📋 Overview (Tafseel)
 
-## Project Structure
+Yeh Flask-based web application ODT (OpenDocument Text) files ko process karti hai aur questions ko properly format karti hai. Yeh application **sabse pehle validate** karti hai ke uploaded file actual ODT file hai ya nahi, aur agar koi issues hain to unko list kar deti hai.
+
+## 🎯 Key Features (Khaas Khasusiyat)
+
+### 1. **ODT File Validation** (Sabse Pehle)
+Application upload hone wali file ko thoroughly check karti hai:
+
+- ✅ File exist karti hai ya nahi
+- ✅ File empty to nahi (0 bytes)
+- ✅ Valid ZIP format hai (ODT files ZIP format mein hoti hain)
+- ✅ Correct magic bytes hain (PK signature)
+- ✅ `mimetype` file mojood hai
+- ✅ Correct mimetype hai (`application/vnd.oasis.opendocument.text`)
+- ✅ `content.xml` file mojood hai
+- ✅ `content.xml` parse ho sakta hai
+
+**Agar koi bhi check fail hota hai**, application user ko clear error message dikhati hai ke kya issue hai.
+
+### 2. **Processing Operations** (7 Steps)
+
+File valid hone ke baad, yeh operations perform hote hain:
+
+#### Step 1: Fix Question Numbers & Remove Brackets
+- Question numbers ko ascending order mein fix karta hai (1, 2, 3...)
+- Duplicate question numbers ko remove karta hai
+- Bracket text `[People]`, `[Process]` etc. ko remove karta hai
+- Valid question types (HOTSPOT, SIMULATION, DRAG DROP, etc.) ko preserve karta hai
+
+**Input:**
+```
+Question No: 45 HOTSPOT [People]
+Question No: 45 SIMULATION
+Question: 12 [Process]
+```
+
+**Output:**
+```
+Question: 1 HOTSPOT
+Question: 2 SIMULATION
+Question: 3
+```
+
+#### Step 2: Ensure Spacing Before Questions
+- Questions se pehle proper spacing ensure karta hai
+- Agar question directly text ke baad hai to spacing add karta hai
+
+#### Step 3: Combined Text Operations
+Ek hi pass mein multiple text operations:
+- `QUESTION NO:` → `Question:` (replace karta hai)
+- `Explanation:` tags remove karta hai (unnecessary ones)
+- `References:` → `Reference:` (plural to singular)
+- `<map>` tags remove karta hai
+
+**Input:**
+```
+QUESTION NO: 1
+Explanation: Some text
+References: Link here
+<map>data</map>
+```
+
+**Output:**
+```
+Question: 1
+Some text
+Reference: Link here
 
 ```
-flask_document_processor/
-├── app.py                 # Main Flask application
-├── templates/
-│   └── index.html        # Frontend HTML
-├── requirements.txt      # Python dependencies
-└── uploads/              # Auto-generated folder for processed files
+
+#### Step 4: Question Types to Next Line
+Question types ko separate line par shift karta hai
+
+**Input:**
+```
+Question: 1 HOTSPOT Some text here
 ```
 
-## Installation
+**Output:**
+```
+Question: 1
+HOTSPOT Some text here
+```
 
-### 1. Python Environment Setup
+#### Step 5: Normalize Option Spacing
+Options (A, B, C, D) ka formatting consistent banata hai
 
+**Input:**
+```
+A.Option text
+B .  Text here
+C    .Text
+```
+
+**Output:**
+```
+A. Option text
+B. Text here
+C. Text
+```
+
+#### Step 6: Add Explanation Tags
+Answer ke baad agar text hai aur "Explanation:" nahi hai to add karta hai
+
+**Input:**
+```
+Answer: A
+This is the explanation text.
+```
+
+**Output:**
+```
+Answer: A
+Explanation:
+This is the explanation text.
+```
+
+#### Step 7: Add Line Spacing
+Question: aur Answer: ke baad proper line spacing add karta hai for better readability
+
+## 🚀 Installation & Usage
+
+### Prerequisites
 ```bash
-# Virtual environment create karein (optional but recommended)
-python -m venv venv
-
-# Virtual environment activate karein
-# Windows:
-venv\Scripts\activate
-# Linux/Mac:
-source venv/bin/activate
+Python 3.8+
+pip (Python package manager)
 ```
 
-### 2. Dependencies Install Karein
+### Installation Steps
 
+1. **Dependencies install karein:**
 ```bash
 pip install -r requirements.txt
 ```
 
-## How to Run
-
-### Application Start Karein
-
+2. **Application run karein:**
 ```bash
-python app.py
+python app_odt.py
 ```
 
-Application start ho jayegi aur ye message dikhega:
-```
-* Running on http://0.0.0.0:5000
-```
-
-### Browser Mein Open Karein
-
-Apne browser mein ja kar ye URL open karein:
+3. **Browser mein open karein:**
 ```
 http://localhost:5000
 ```
 
-## Usage
+## 📁 File Structure
 
-1. **File Upload**: DOCX ya ODT file upload karein (drag-drop ya click karke)
-2. **Process**: "Apply Macros" button click karein
-3. **Download**: Processing complete hone ke baad processed file download karein
+```
+project/
+│
+├── app_odt.py              # Main Flask application
+├── requirements.txt         # Python dependencies
+├── templates/
+│   └── index.html          # Web interface
+└── uploads/                # Processed files save hoti hain (auto-created)
+```
 
-## Features
+## 🔍 How Validation Works (Kaise Kaam Karta Hai)
 
-### For ODT Files:
-- Question numbering fix (1, 2, 3...)
-- "Question No:" ko "Question:" mein convert
-- Bracket text remove ([People], [Process] etc.)
-- Valid question types preserve
+### Valid ODT File ki Requirements:
 
-### For DOCX Files:
-- Question numbers fix aur brackets remove
-- Proper spacing ensure
-- Text operations (Question No: → Question:, References → Reference)
-- Question types ko next line mein move
-- Option spacing normalize (A. text, B. text)
-- Explanation tags add
-- Line spacing add after Question: aur Answer:
-
-## API Endpoints
-
-### GET `/`
-- Main page render karti hai
-
-### POST `/process`
-- File upload aur process karti hai
-- **Request**: multipart/form-data with 'file' field
-- **Response**: JSON with processing status
-
-### GET `/download/<filename>`
-- Processed file download karti hai
-
-## Configuration
-
-`app.py` mein ye settings change kar sakte hain:
-
+1. **ZIP Structure**: ODT file ek ZIP archive hoti hai
 ```python
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # Max file size (16MB)
-app.config['UPLOAD_FOLDER'] = 'uploads'               # Upload folder path
+# Check karta hai zipfile.is_zipfile()
 ```
 
-## Troubleshooting
-
-### Port already in use error
-Agar port 5000 already use mein hai, to app.py ki last line change karein:
+2. **Magic Bytes**: File ke first 2 bytes `PK` (0x504B) hone chahiye
 ```python
-app.run(debug=True, host='0.0.0.0', port=5001)  # Different port use karein
+# Reads first 4 bytes: b'PK\x03\x04'
 ```
 
-### Import errors
-Make sure sare dependencies install hain:
-```bash
-pip install -r requirements.txt
+3. **Mimetype File**: Archive mein `mimetype` file honi chahiye with exact content:
+```
+application/vnd.oasis.opendocument.text
 ```
 
-## Requirements
+4. **Content.xml**: Main content file honi chahiye jo valid XML ho
 
-- Python 3.7+
-- Flask 3.0.0
-- python-docx 1.1.0
-- lxml 5.1.0
-- Werkzeug 3.0.1
+### Invalid File Examples:
 
-## Notes
+#### Example 1: Simple XML File (Not ODT)
+```xml
+<?xml version="1.0"?>
+<document>Content here</document>
+```
+**Error**: "File is not a valid ZIP archive"
 
-- Streamlit code ko completely Flask mein convert kiya gaya hai
-- Real-time processing status updates
-- Modern, responsive UI with drag-and-drop support
-- Error handling aur validation included
-- Automatic cleanup of temporary files
+#### Example 2: Wrong Mimetype
+Agar `mimetype` file mein:
+```
+application/xml
+```
+**Error**: "Invalid mimetype: 'application/xml' (expected: 'application/vnd.oasis.opendocument.text')"
+
+#### Example 3: Missing Files
+Agar ZIP hai lekin `content.xml` missing hai:
+**Error**: "Missing 'content.xml' file in ODT structure"
+
+## 🖥️ User Interface Features
+
+### Real-time Status Updates
+- Har processing step ka live status
+- Time taken for each operation
+- Visual indicators (⏳ in progress, ✅ completed, ❌ failed)
+
+### Error Handling
+- Clear validation errors with issue list
+- Processing errors with detailed messages
+- User-friendly error display
+
+### Download
+- Automatic processed file download
+- Original filename preserved with "processed_" prefix
+- Statistics display (total time, questions fixed)
+
+## 🔧 Technical Details
+
+### ODT File Structure:
+```
+ODT File (ZIP Archive)
+│
+├── mimetype                          # MIME type identifier
+├── content.xml                       # Main document content
+├── styles.xml                        # Document styles
+├── meta.xml                          # Metadata
+└── META-INF/
+    └── manifest.xml                  # File manifest
+```
+
+### XML Namespaces Used:
+```python
+ODT_NAMESPACES = {
+    'text': 'urn:oasis:names:tc:opendocument:xmlns:text:1.0',
+    'office': 'urn:oasis:names:tc:opendocument:xmlns:office:1.0'
+}
+```
+
+### Processing Flow:
+```
+Upload File
+    ↓
+Validate ODT Structure
+    ↓
+Extract to Temp Directory
+    ↓
+Parse content.xml
+    ↓
+Apply 7 Processing Steps
+    ↓
+Save Modified XML
+    ↓
+Re-pack to ODT (ZIP)
+    ↓
+Return Processed File
+```
+
+## ⚠️ Important Notes
+
+1. **File Size Limit**: Maximum 200MB
+2. **Only ODT**: Application sirf ODT files accept karti hai
+3. **Temporary Files**: Processing ke baad automatically cleanup hoti hai
+4. **Thread-Safe**: Background processing with proper thread handling
+
+## 🐛 Troubleshooting
+
+### Issue: "File is not a valid ZIP archive"
+**Solution**: File actual mein ODT nahi hai. Proper ODT file export/save karein.
+
+### Issue: "Invalid mimetype"
+**Solution**: File ko ODT format mein properly save karein (LibreOffice ya OpenOffice use karein).
+
+### Issue: "Cannot parse content.xml"
+**Solution**: File corrupt hai. Original file se dobara try karein.
+
+
+
+---
+
+**Note**: Yeh application production-ready hai with proper error handling, validation, and user-friendly interface.
